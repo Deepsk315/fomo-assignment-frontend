@@ -4,7 +4,7 @@ import axios from 'axios';
 interface DataState {
   data: any[];
   loading: boolean;
-  error: { message: string } | null;
+  error: string | null;
 }
 
 const initialState: DataState = {
@@ -29,7 +29,6 @@ const dataSlice = createSlice({
     builder
       .addCase(fetchData.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
       .addCase(fetchData.fulfilled, (state, action) => {
         state.loading = false;
@@ -37,7 +36,7 @@ const dataSlice = createSlice({
       })
       .addCase(fetchData.rejected, (state, action) => {
         state.loading = false;
-        state.error = { message: action.error.message || 'Failed to fetch data' };
+        state.error = action.error.message || 'Failed to fetch data';
       });
   },
 });

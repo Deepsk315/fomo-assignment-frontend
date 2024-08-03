@@ -16,16 +16,17 @@ const App: React.FC = () => {
   const dispatch = useAppDispatch();
   const data = useAppSelector((state) => state.data.data);
   const loading = useAppSelector((state) => state.data.loading);
-  const error = useAppSelector((state) => state.data.error);
+  const error = useAppSelector((state) => {
+    console.error('error : ', state.data)
+    state.data.error
+  });
 
   const [symbol, setSymbol] = React.useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   React.useEffect(() => {
     if (symbol) {
-      dispatch(fetchData(symbol)).catch((err) => {
-        console.error('Failed to fetch data:', err);
-      });
+      dispatch(fetchData(symbol));
     }
   }, [dispatch, symbol]);
 
@@ -45,9 +46,7 @@ const App: React.FC = () => {
 
   const handleSymbolChange = (newSymbol: string) => {
     setSymbol(newSymbol);
-    dispatch(fetchData(newSymbol.toUpperCase())).catch((err) => {
-      console.error('Failed to fetch data:', err);
-    });
+    dispatch(fetchData(newSymbol.toUpperCase()));
     setIsModalOpen(false);
   };
 
@@ -75,7 +74,7 @@ const App: React.FC = () => {
             ) : (
               <DataTable data={data} />
             )}
-            {error && <p className="error">Error: {error.message}</p>}
+            {error && <p className="error">Error: {error}</p>}
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
               <SymbolSelector onChange={handleSymbolChange} />
             </Modal>
