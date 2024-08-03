@@ -23,7 +23,9 @@ const App: React.FC = () => {
 
   React.useEffect(() => {
     if (symbol) {
-      dispatch(fetchData(symbol));
+      dispatch(fetchData(symbol)).catch((err) => {
+        console.error('Failed to fetch data:', err);
+      });
     }
   }, [dispatch, symbol]);
 
@@ -43,7 +45,9 @@ const App: React.FC = () => {
 
   const handleSymbolChange = (newSymbol: string) => {
     setSymbol(newSymbol);
-    dispatch(fetchData(newSymbol.toUpperCase()));
+    dispatch(fetchData(newSymbol.toUpperCase())).catch((err) => {
+      console.error('Failed to fetch data:', err);
+    });
     setIsModalOpen(false);
   };
 
@@ -71,7 +75,7 @@ const App: React.FC = () => {
             ) : (
               <DataTable data={data} />
             )}
-            {error && <p className="error">Error: {error}</p>}
+            {error && <p className="error">Error: {error.message}</p>}
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
               <SymbolSelector onChange={handleSymbolChange} />
             </Modal>
