@@ -16,10 +16,7 @@ const App: React.FC = () => {
   const dispatch = useAppDispatch();
   const data = useAppSelector((state) => state.data.data);
   const loading = useAppSelector((state) => state.data.loading);
-  const error = useAppSelector((state) => {
-    console.error('error : ', state.data)
-    state.data.error
-  });
+  const error = useAppSelector((state) => state.data.error);
 
   const [symbol, setSymbol] = React.useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -74,7 +71,7 @@ const App: React.FC = () => {
             ) : (
               <DataTable data={data} />
             )}
-            {error && <p className="error">Error: {error}</p>}
+            {/* {error && <p className="error">Error: {error}</p>} */}
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
               <SymbolSelector onChange={handleSymbolChange} />
             </Modal>
