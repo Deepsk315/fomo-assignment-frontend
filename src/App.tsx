@@ -1,11 +1,16 @@
-import React, { useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '../src/store/hooks';
-import { fetchData } from '../src/store/dataSlice';
-import DataTable from '../src/components/DataTable';
-import SymbolSelector from '../src/components/SymbolSelector';
+import React from 'react';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import store, { persistor } from './store';
+import DataTable from './components/DataTable';
+import Modal from './components/Modal';
+import SymbolSelector from './components/SymbolSelector';
+import { useAppDispatch, useAppSelector } from './store/hooks';
+import { fetchData } from './store/dataSlice';
 import io from 'socket.io-client';
+import './App.css';
 
-const socket = io('http://localhost:4002'); // Adjust the URL if necessary
+const socket = io('https://fomo-assignment.onrender.com/');
 
 const App: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -13,24 +18,67 @@ const App: React.FC = () => {
   const loading = useAppSelector((state) => state.data.loading);
   const error = useAppSelector((state) => state.data.error);
 
-  useEffect(() => {
-    dispatch(fetchData('BTC'));
+  const [symbol, setSymbol] = React.useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
 
-    socket.on('dataUpdate', (newData) => {
-      dispatch({ type: 'data/fetchData/fulfilled', payload: [newData, ...data].slice(0, 5) });
-    });
+  React.useEffect(() => {
+    if (symbol) {
+      dispatch(fetchData(symbol));
+    }
+  }, [dispatch, symbol]);
+
+  React.useEffect(() => {
+    const handleDataUpdate = (newData: any) => {
+      if (!symbol) {
+        dispatch({ type: 'data/fetchData/fulfilled', payload: [newData, ...data].slice(0, 20) });
+      }
+    };
+
+    socket.on('dataUpdate', handleDataUpdate);
 
     return () => {
-      socket.off('dataUpdate');
+      socket.off('dataUpdate', handleDataUpdate);
     };
-  }, [dispatch, data]);
+  }, [dispatch, data, symbol]);
+
+  const handleSymbolChange = (newSymbol: string) => {
+    setSymbol(newSymbol);
+    dispatch(fetchData(newSymbol.toUpperCase()));
+    setIsModalOpen(false);
+  };
+
+  const handleReset = () => {
+    setSymbol(null);
+  };
 
   return (
-    <div className="App">
-      <SymbolSelector />
-      {loading ? <p>Loading...</p> : <DataTable data={data} />}
-      {error && <p>Error: {error}</p>}
-    </div>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <div className="App">
+          <header className="App-header">
+            <h1>Real-Time Crypto Data</h1>
+            {symbol && <h2>Displaying data for: {symbol}</h2>}
+          </header>
+          <main>
+            <button onClick={() => setIsModalOpen(true)} className="open-modal-button">
+              Select Symbol
+            </button>
+            <button onClick={handleReset} className="reset-button">
+              Reset
+            </button>
+            {loading ? (
+              <p>Loading...</p>
+            ) : (
+              <DataTable data={data} />
+            )}
+            {error && <p className="error">Error: {error}</p>}
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+              <SymbolSelector onChange={handleSymbolChange} />
+            </Modal>
+          </main>
+        </div>
+      </PersistGate>
+    </Provider>
   );
 };
 

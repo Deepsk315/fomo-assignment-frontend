@@ -16,7 +16,7 @@ const initialState: DataState = {
 export const fetchData = createAsyncThunk(
   'data/fetchData',
   async (symbol: string, thunkAPI) => {
-    const response = await axios.get(`/api/data/${symbol}`);
+    const response = await axios.get(`https://fomo-assignment.onrender.com/api/data/${symbol}`);
     return response.data;
   }
 );

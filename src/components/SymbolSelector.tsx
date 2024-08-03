@@ -1,26 +1,35 @@
 import React, { useState } from 'react';
-import { useAppDispatch } from '../store/hooks'; // Use the typed useDispatch
-import { fetchData } from '../store/dataSlice';
+import Select from 'react-select';
 
-const SymbolSelector: React.FC = () => {
-  const [symbol, setSymbol] = useState('');
-  const dispatch = useAppDispatch(); // Use the typed dispatch
+interface SymbolSelectorProps {
+  onChange: (newSymbol: string) => void;
+}
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSymbol(e.target.value);
-  };
+const symbolOptions = [
+  { value: 'BTC', label: 'BTC' },
+  { value: 'ETH', label: 'ETH' },
+  { value: 'USDT', label: 'USDT' },
+  { value: 'SOL', label: 'SOL' },
+  { value: 'BNB', label: 'BNB' },
+];
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    dispatch(fetchData(symbol));
+const SymbolSelector: React.FC<SymbolSelectorProps> = ({ onChange }) => {
+  const [selectedOption, setSelectedOption] = useState(null);
+
+  const handleChange = (selectedOption: any) => {
+    setSelectedOption(selectedOption);
+    onChange(selectedOption.value);
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <input type="text" value={symbol} onChange={handleChange} placeholder="Enter symbol" />
-        <button type="submit">Fetch Data</button>
-      </form>
+    <div className="symbol-selector">
+      <Select
+        options={symbolOptions}
+        value={selectedOption}
+        onChange={handleChange}
+        placeholder="Select symbol"
+        className="symbol-select"
+      />
     </div>
   );
 };
